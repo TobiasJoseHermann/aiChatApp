@@ -1,0 +1,26 @@
+{
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.10.5",
+    "@emotion/styled": "^11.10.5",
+    "@fontsource/roboto": "^4.5.8",
+    "@mui/icons-material": "^5.11.0",
+    "@mui/material": "^5.11.4",
+    "@mui/x-date-pickers": "^5.0.13",
+    "axios": "^1.2.6",
+    "dayjs": "^1.11.7",
+    "mongoose": "^6.8.4",
+    "next": "latest",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-query": "^3.39.2"
+  },
+  "devDependencies": {
+    "nanoid": "^4.0.0"
+  }
+}
