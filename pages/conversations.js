@@ -10,36 +10,32 @@ import { AppBar, Toolbar, Stack, Typography, Button, Grid, List, ListItem, ListI
 import SendIcon from '@mui/icons-material/Send';
 import IconButton from '@mui/material/IconButton';
 import { useMutation } from 'react-query';
-import { set } from 'mongoose';
 
 export default function Home() {
   
   const APIURL = 'http://localhost:3000'
     const drawerWidth = 240;
 
-  const router = useRouter()
+    const router = useRouter()
 
     const [newMessage, setNewMessage] = useState('');
     const [conversationName, setConversationName] = useState('');
     const [selectedConversationID, setSelectedConversationID] = useState(0);
 
 
-    const handleSendMessage = () => {
-        axios.post(`${APIURL}/api/sendMessageAPI`, {message: newMessage, conversation_id: selectedConversationID})
+    const handleSendMessage = async () => {
+        await axios.post(`${APIURL}/api/sendMessageAPI`, {message: newMessage, conversation_id: selectedConversationID})
         setNewMessage('');
+        mutationSelectedConversation.mutate(selectedConversationID);
     }
+
+    const sendMessageMutation = useMutation(handleSendMessage)
 
     const handleAddConversation = () => {
         axios.post(`${APIURL}/api/addConversationAPI`, {name: conversationName})
     }
 
 
-
-    async function fetchMessages() {
-        return axios.get(`${APIURL}/api/messagesAPI`)
-    }
-
-    const { isLoading, isError, data: messagesData, error } = useQuery(['messages'], fetchMessages)
 
     async function fetchSelectedConversation(id) {
         setSelectedConversationID(id);
@@ -54,20 +50,17 @@ export default function Home() {
         return axios.get(`${APIURL}/api/conversationsAPI`)
     }
 
-    const { isLoading: isLoadingConversations, isError: isErrorConversations, data: conversationsData, error: errorConversations } = useQuery(['conversations'], fetchConversations)
+    const queryConversations = useQuery(['conversations'], fetchConversations)
     
 
-    if (isLoadingConversations) {
-        return <Loading isLoading={isLoading}/>
+    if (queryConversations.isLoading || sendMessageMutation.isLoading) {
+        return <Loading isLoading={queryConversations.isLoading || sendMessageMutation.isLoading}/>
     }
 
-    if (isErrorConversations) {
-        return <ErrorJSX error={error} />
+    if (queryConversations.isError) {
+        return <ErrorJSX error={queryConversations.error} />
     }
 
-    // if (messagesData.msg && messagesData.msg === "command find requires authentication") {
-    // return <span>Command requieres auth</span>
-    // }
 
     return (
     <div>
@@ -111,13 +104,12 @@ export default function Home() {
                     <Toolbar />
                     <Divider />
                     <List>
-                        {conversationsData.data.map((conversation, index) => (
+                        {queryConversations.data.data.map((conversation, index) => (
                             <Button 
                                 onClick={() => mutationSelectedConversation.mutate(conversation.conversation_id)} 
                                 style={{width: '100%', justifyContent: 'flex-start'}}
                             >
                                 <ListItem key={index} style={{border: '1px solid #ccc', margin: '10px 0'}}>
-                                    <ListItemText primary={conversation.conversation_id} />
                                     <ListItemText primary={conversation.name} />
                                 </ListItem>
                             </Button>
@@ -126,8 +118,14 @@ export default function Home() {
                 </Drawer>
                 <Box component="main" sx={{ bgcolor: 'background.default', p: 2, mt: 7,ml: 2 }}>
                     <Stack direction="column" spacing={2} alignItems="flex-start" justifyContent="center">
-                        {mutationSelectedConversation.data?.data.map((message, index) => (
-                            <Chip label={message.text} key={index} sx={{ ml: 0}}/>
+                        {mutationSelectedConversation.isLoading ? 
+                        <Typography> Loading Messages</Typography> :
+                        mutationSelectedConversation.data?.data.map((message, index) => (
+                            <Chip 
+                                label={message.is_ai_response ? `Ai: ${message.text}` : `You: ${message.text}`} 
+                                key={index} 
+                                sx={{ ml: 0, backgroundColor: message.is_ai_response ? 'secondary.main' : 'primary.main' }}
+                            />
                         ))}
                     </Stack>
                     <AppBar position="fixed" color="primary" sx={{ top: 'auto', bottom: 500, p: 1, width: `calc(100% - ${drawerWidth}px)`, ml: `${drawerWidth}px` }}>
@@ -145,7 +143,7 @@ export default function Home() {
                                     style: { color: 'white' }
                                 }}
                             />
-                            <IconButton color="inherit" onClick={handleSendMessage}>
+                            <IconButton color="inherit" onClick={sendMessageMutation.mutate}>
                                 <SendIcon fontSize="large" />
                             </IconButton>
                         </Toolbar>
