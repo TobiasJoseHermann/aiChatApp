@@ -10,6 +10,7 @@ import SendIcon from '@mui/icons-material/Send';
 import IconButton from '@mui/material/IconButton';
 import { useMutation } from 'react-query';
 import { getAuth,signOut } from 'firebase/auth';
+import { app, auth } from '../utils/firebase';
 import DeleteIcon from '@mui/icons-material/Delete';
 
 export default function Home() {
@@ -18,7 +19,7 @@ export default function Home() {
     const drawerWidth = 240;
 
     const router = useRouter()
-    const auth = getAuth();
+    // const auth = getAuth();
 
     const [newMessage, setNewMessage] = useState('');
     const [conversationName, setConversationName] = useState('');
