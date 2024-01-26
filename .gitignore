@@ -32,6 +32,8 @@ yarn-error.log*
 
 # vs code
 .vscode/*
+#Firebase
+firebase.js
 
 #TODOS
 TODOS.md

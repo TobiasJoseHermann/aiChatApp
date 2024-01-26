@@ -5,7 +5,6 @@ import axios from 'axios' // Importa axios
 export default async function handler(req, res) {
     try {
         let pool = await getDb()
-        console.log(req.body.nombreUsuario, req.body.contrasena)
         let result = await pool.request()
             .input('text', sql.VarChar, req.body.message)
             .input('conversation_id', sql.Int, req.body.conversation_id)

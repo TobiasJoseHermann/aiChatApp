@@ -11,42 +11,69 @@ import { Box } from '@mui/system';
 import axios from 'axios';
 import Loading from '../components/Loading';
 
+// firebase
+import { app, auth } from '../utils/firebase';
+import { getIdToken, signInWithEmailAndPassword } from 'firebase/auth';
+
+
 export default function Home() {
   
-  const APIURL = 'http://localhost:3000'
+    const APIURL = 'http://localhost:3000'
 
-  const router = useRouter()
-  const theme = useTheme()
+    const router = useRouter()
+    const theme = useTheme()
 
-  const [formData, setFormData] = useState({
-    nombreUsuario: "",
-    contrasena: ""
-  })
+    const [formData, setFormData] = useState({
+        nombreUsuario: "",
+        contrasena: ""
+    })
 
-  function handleChange(event) {
-      const {name, value, type, checked} = event.target
-      setFormData(prevFormData => ({
-          ...prevFormData,
-          [name]: type === "checkbox" ? checked : value
-      }))
-  }
+    function handleChange(event) {
+        const {name, value, type, checked} = event.target
+        setFormData(prevFormData => ({
+            ...prevFormData,
+            [name]: type === "checkbox" ? checked : value
+        }))
+    }
 
-  async function handleSubmit(event) {
-    event.preventDefault();
 
-    connectDBMutation.mutate(formData)
+    async function connectDbFun() {
+        const token = await getIdToken(auth.currentUser)
+        return axios.post(`${APIURL}/api/connectDBAPI`, {token: token})
+    }
 
-  };
+    const connectDbMutation = useMutation({mutationFn: connectDbFun,
+        onSuccess: () => {
+            console.log("Conexión a la base de datos exitosa", connectDbMutation.data)
+            router.push('/conversations')
+        },
+        onError: (error) => {
+            console.log("Error al conectar a la base de datos", error)
+        }
+    });
+    
 
-  function connectDBMutFun(connectionData) {
-    return axios.post(`${APIURL}/api/connectDBAPI`, connectionData)
-  }
+    async function handleSubmit(event) {
+        event.preventDefault();
+        connectFirebaseAuthMutation.mutate(formData)
+    };
 
-  const connectDBMutation = useMutation({mutationFn: connectDBMutFun,
-    onSuccess: () => {
-      router.push('/conversations')
-    },
-  })
+    function connectFirebaseAuthFun(connectionData) {
+        return signInWithEmailAndPassword(auth, connectionData.nombreUsuario, connectionData.contrasena)
+    }
+
+    const connectFirebaseAuthMutation = useMutation({mutationFn: connectFirebaseAuthFun,
+        onSuccess: () => {
+            console.log("Conexión exitosa", connectFirebaseAuthMutation.data)
+            connectDbMutation.mutate()
+        },
+        onError: (error) => {
+            console.log("Error", error)
+            router.push('/')
+        }
+    })
+
+
 
   return (
     <div>
@@ -56,7 +83,7 @@ export default function Home() {
       </Head>
       <ThemeProvider theme={theme}>
         <Container component="main" maxWidth="xs">
-          <Loading isLoading={connectDBMutation.isLoading} />
+          <Loading isLoading={connectFirebaseAuthMutation.isLoading} />
           <CssBaseline />
           <Box
             sx={{
@@ -66,9 +93,10 @@ export default function Home() {
               alignItems: 'center',
             }}
           >
-            {connectDBMutation.isError && <Alert severity="error">Wrong user or password</Alert> }
-            <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
-              <Login />
+            {connectFirebaseAuthMutation.isError && <Alert severity="error">Wrong user or password</Alert> }
+            <Avatar sx={{ m: 1, bgcolor: 'secondary.main', width: 100, height: 100 }}>
+                <img src="/favicon.ico" alt="icon" style={{ width: '100px', height: '100px' }} />
+              {/* <Login /> */}
             </Avatar>
             <Typography component="h1" variant="h5">
               Log In
