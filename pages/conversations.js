@@ -15,7 +15,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 
 export default function Home() {
   
-    const APIURL = 'http://localhost:3000'
+    const APIURL = 'http://localhost:8080'
     const drawerWidth = 240;
 
     const router = useRouter()
