@@ -39,8 +39,7 @@ export default function Home() {
 
     async function connectDbFun() {
         const token = await getIdToken(auth.currentUser)
-        print("token", token)
-        return axios.post("http://localhost:8080/conversations",{},{
+        return axios.post("http://localhost:8080/conversationsAPI",{},{
             headers: {authtoken: token}
         })
 }
