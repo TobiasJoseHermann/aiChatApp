@@ -15,7 +15,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 
 export default function Home() {
   
-    const APIURL = 'http://localhost:3000'
+    const APIURL = 'http://localhost:8080'
+    // const APIURL = 'http://localhost:3000/api'
     const drawerWidth = 240;
 
     const router = useRouter()
@@ -40,15 +41,24 @@ export default function Home() {
     })
 
     const handleSendMessage = async () => {
-        await axios.post(`${APIURL}/api/sendMessageAPI`, {message: newMessage, conversation_id: selectedConversationID})
+        await axios.post(`${APIURL}/sendMessageAPI`, {message: newMessage, conversation_id: selectedConversationID}, {
+            headers: {
+                authtoken: await auth.currentUser.getIdToken()
+            }
+        })
         setNewMessage('');
         mutationSelectedConversation.mutate(selectedConversationID);
     }
 
     const sendMessageMutation = useMutation(handleSendMessage)
 
-    const handleAddConversation = () => {
-        return axios.post(`${APIURL}/api/addConversationAPI`, {name: conversationName, email: auth.currentUser.email})
+    const handleAddConversation = async () => {
+        console.log("Adding Conversation")
+        return axios.post(`${APIURL}/addConversationAPI`, {name: conversationName, email: auth.currentUser.email}, {
+            headers: {
+                authtoken: await auth.currentUser.getIdToken()
+            }
+        })
     }
     
     const addConversationMutation = useMutation({mutationFn: handleAddConversation,
@@ -63,7 +73,12 @@ export default function Home() {
 
     async function fetchSelectedConversation(id) {
         setSelectedConversationID(id);
-        return axios.post(`${APIURL}/api/changeConversationAPI`, {id: id})
+        return axios.post(`${APIURL}/changeConversationAPI`, {id: id},{
+            headers: {
+                authtoken: await auth.currentUser.getIdToken()
+            }
+
+        })
     }
 
     const mutationSelectedConversation = useMutation({
@@ -71,7 +86,14 @@ export default function Home() {
     });
 
     async function handleDeleteConversation(id) {
-        return axios.delete(`${APIURL}/api/deleteConversationAPI`, {data: {id: id}})
+        const token = await auth.currentUser.getIdToken();
+
+        return axios.delete(`${APIURL}/deleteConversationAPI`, 
+        {
+            data: {id: id},
+            headers: { authtoken: token }
+        },
+        )
     }
 
     const deleteConversationMutation = useMutation({
@@ -82,7 +104,11 @@ export default function Home() {
     })
 
     async function fetchConversations() {
-        return axios.post(`${APIURL}/api/conversationsAPI`, {email: auth.currentUser.email})
+        return axios.post(`${APIURL}/conversationsAPI`, {email: auth.currentUser.email}, {
+            headers: {
+                authtoken: await auth.currentUser.getIdToken()
+            }
+        })
     }
 
     const queryConversations = useQuery(['conversations'], fetchConversations)
@@ -198,7 +224,7 @@ export default function Home() {
                     >
                         {mutationSelectedConversation.isLoading ? 
                         <Typography> Loading Messages</Typography> :
-                        mutationSelectedConversation.data?.data.map((message, index) => (
+                        (mutationSelectedConversation.data?.data || []).map((message, index) => (
                             <Chip 
                                 label={message.is_ai_response ? `Ai: ${message.text}` : `You: ${message.text}`} 
                                 key={index} 
