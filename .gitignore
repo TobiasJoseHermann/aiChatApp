@@ -38,5 +38,6 @@ yarn-error.log*
 #TODOS
 TODOS.md
 
-#ignore API
-pages/api/*
+/pages/api
+
+/models
