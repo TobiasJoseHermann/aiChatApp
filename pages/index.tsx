@@ -3,8 +3,6 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 import Button from "@mui/material/Button";
 import {
-    Backdrop,
-    CircularProgress,
     Container,
     Typography,
     useTheme,
@@ -12,12 +10,10 @@ import {
     TextField,
     Alert,
 } from "@mui/material";
-import { useMutation, useQuery } from "react-query";
+import { useMutation } from "react-query";
 import { ThemeProvider } from "@mui/material";
 import { CssBaseline, Avatar } from "@mui/material";
-import { Login } from "@mui/icons-material";
 import { Box } from "@mui/system";
-import axios from "axios";
 import Loading from "../components/Loading";
 
 // firebase
@@ -60,7 +56,6 @@ export default function Home() {
         mutationFn: connectFirebaseAuthFun,
         onSuccess: () => {
             console.log("Conexión exitosa", connectFirebaseAuthMutation.data);
-            // connectDbMutation.mutate();
             router.push("/conversations");
         },
         onError: (error) => {

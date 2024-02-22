@@ -286,6 +286,7 @@ export default function Home() {
                                         conversation.ID ===
                                         selectedConversationID
                                     }
+                                    key={conversation.ID}
                                 >
                                     <ListItemText primary={conversation.Name} />
                                     <ListItemIcon sx={{ p: 0, m: 0 }}>
