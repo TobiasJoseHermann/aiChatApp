@@ -18,10 +18,13 @@ import Loading from "../components/Loading";
 
 // firebase
 import { app, auth } from "../utils/firebase";
-import { getIdToken, signInWithEmailAndPassword } from "firebase/auth";
-import Link from "next/link";
+import {
+    createUserWithEmailAndPassword,
+    getIdToken,
+    signInWithEmailAndPassword,
+} from "firebase/auth";
 
-export default function Home() {
+export default function signUp() {
     const APIURL = process.env.NEXT_PUBLIC_API_URL;
 
     const router = useRouter();
@@ -42,26 +45,28 @@ export default function Home() {
 
     async function handleSubmit(event) {
         event.preventDefault();
-        connectFirebaseAuthMutation.mutate(formData);
+        postFirebaseAuthMutation.mutate(formData);
     }
 
-    function connectFirebaseAuthFun(connectionData) {
-        return signInWithEmailAndPassword(
+    function postFirebaseAuthFun(connectionData) {
+        return createUserWithEmailAndPassword(
             auth,
             connectionData.nombreUsuario,
             connectionData.contrasena
         );
     }
 
-    const connectFirebaseAuthMutation = useMutation({
-        mutationFn: connectFirebaseAuthFun,
+    const postFirebaseAuthMutation = useMutation({
+        mutationFn: postFirebaseAuthFun,
         onSuccess: () => {
-            console.log("Conexión exitosa", connectFirebaseAuthMutation.data);
-            router.push("/conversations");
+            console.log(
+                "User created succesfully",
+                postFirebaseAuthMutation.data
+            );
+            router.push("/");
         },
         onError: (error) => {
             console.log("Error", error);
-            router.push("/");
         },
     });
 
@@ -73,9 +78,7 @@ export default function Home() {
             </Head>
             <ThemeProvider theme={theme}>
                 <Container component="main" maxWidth="xs">
-                    <Loading
-                        isLoading={connectFirebaseAuthMutation.isLoading}
-                    />
+                    <Loading isLoading={postFirebaseAuthMutation.isLoading} />
                     <CssBaseline />
                     <Box
                         sx={{
@@ -85,10 +88,8 @@ export default function Home() {
                             alignItems: "center",
                         }}
                     >
-                        {connectFirebaseAuthMutation.isError && (
-                            <Alert severity="error">
-                                Wrong user or password
-                            </Alert>
+                        {postFirebaseAuthMutation.isError && (
+                            <Alert severity="error">Error creating user</Alert>
                         )}
                         <Avatar
                             sx={{
@@ -105,7 +106,7 @@ export default function Home() {
                             />
                         </Avatar>
                         <Typography component="h1" variant="h5">
-                            Log In
+                            Sign Up
                         </Typography>
                         <Box
                             component="form"
@@ -136,7 +137,6 @@ export default function Home() {
                                         label="Password"
                                         onChange={handleChange}
                                         value={formData.contrasena}
-                                        autoFocus
                                     />
                                 </Grid>
                                 <Grid item xs={12}>
@@ -150,20 +150,8 @@ export default function Home() {
                                             formData.contrasena === ""
                                         }
                                     >
-                                        Log In
+                                        Sign Up
                                     </Button>
-                                </Grid>
-                                <Grid item xs={12}>
-                                    <Link href="/signUp">
-                                        <Button
-                                            fullWidth
-                                            color="secondary"
-                                            variant="contained"
-                                            sx={{ mt: 3, mb: 2 }}
-                                        >
-                                            Sign Up
-                                        </Button>
-                                    </Link>
                                 </Grid>
                             </Grid>
                         </Box>
