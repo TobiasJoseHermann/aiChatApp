@@ -121,7 +121,7 @@ export default function signUp() {
                                         required
                                         fullWidth
                                         id="nombreUsuario"
-                                        label="Username"
+                                        label="Email"
                                         onChange={handleChange}
                                         value={formData.nombreUsuario}
                                         autoFocus

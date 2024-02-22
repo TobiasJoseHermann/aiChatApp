@@ -120,7 +120,7 @@ export default function Home() {
                                         required
                                         fullWidth
                                         id="nombreUsuario"
-                                        label="Username"
+                                        label="Email"
                                         onChange={handleChange}
                                         value={formData.nombreUsuario}
                                         autoFocus
